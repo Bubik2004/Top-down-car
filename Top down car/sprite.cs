@@ -35,6 +35,29 @@ namespace Top_down_car
             null, null, null, transformMatrix: matrix.Transform);
 
             spriteBatch.Draw(spriteTexture, new Rectangle((int)spritePosition.X, (int)spritePosition.Y, (int)spriteSize.X, (int)spriteSize.Y), null, color, rotation, origin, SpriteEffects.None, 0f);
+
+
+            spriteBatch.End();
+        }
+
+        public void DrawLines(SpriteBatch spriteBatch, Texture2D texture, Vector2 start, Vector2 end, MyMatrix matrix,float rotation)
+        {
+            spriteBatch.Begin(SpriteSortMode.Deferred,
+            BlendState.AlphaBlend,
+            SamplerState.PointClamp,
+            null, null, null, transformMatrix: matrix.Transform);
+            //while (distance != end)
+                //spriteBatch.Draw(texture, start, null, Color.White,rotation,
+                //             new Vector2(0f, texture.Height / 2),
+                //             new Vector2(Vector2.Distance(start, end), 0.02f),
+                //             SpriteEffects.None, 0f);
+                //spriteBatch.End();
+
+                spriteBatch.Draw(texture, start, null, Color.White,
+                         (float)Math.Atan2(end.Y - start.Y, end.X - start.X),
+                         new Vector2(0f, texture.Height / 2),
+                         new Vector2(Vector2.Distance(start, end), 0.0025f),
+                         SpriteEffects.None, 0f);
             spriteBatch.End();
 
         }

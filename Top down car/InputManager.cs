@@ -73,7 +73,6 @@ namespace Top_down_car
             {
                 rotationF = 0;
             }
-          
             return steering;
         }
         public float zoom(GraphicsDeviceManager inGraphics) 

@@ -1,7 +1,11 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.Rebar;
+
 namespace Top_down_car
 {
     public class Game1 : Game
@@ -10,7 +14,11 @@ namespace Top_down_car
         private SpriteBatch _spriteBatch;
         private InputManager inputMan;
         private Sprite Road;
-        private Sprite Road1;
+        private Sprite pointer;
+        private Sprite RearLine;
+        private Sprite Line;
+        private Sprite Ref1;
+        private Sprite COR;
         private Sprite supra;
         private Sprite FrontAxle;
         private Sprite RearAxle;
@@ -34,6 +42,9 @@ namespace Top_down_car
         private Vector2 FAaxis;
         private Vector2 Offset;
         private MyMatrix matrix = new MyMatrix();
+
+        private int millisecondsPerFrame = 1; //Update every 1 millisecond
+        private double timeSinceLastUpdate = 0; //Accumulate the elapsed time
 
 
         private float a;
@@ -68,7 +79,12 @@ namespace Top_down_car
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
             loadContent = Content.Load<Texture2D>("road");
-            Road1 = new Sprite(loadContent, new Vector2(-100, -500), new Vector2(400, 30));
+            pointer = new Sprite(loadContent, new Vector2(-100, -500), new Vector2(30, 30));
+            RearLine = new Sprite(loadContent, new Vector2(-100, -500), new Vector2(4000000, 30));
+            Line = new Sprite(loadContent, new Vector2(10, 10), new Vector2(10, 10));
+            COR = new Sprite(loadContent, new Vector2(-100, -500), new Vector2(15, 15));
+            Ref1 = new Sprite(loadContent, new Vector2(10, 10), new Vector2(10, 10));
+
 
             loadContent = Content.Load<Texture2D>("road");
             Road = new Sprite (loadContent, new Vector2 (-4000,-4000), new Vector2(8000,8000));
@@ -85,6 +101,7 @@ namespace Top_down_car
             FrontAx = new Vector2(0, 0);
 
 
+          
 
             //FORCE ON FRONT AND REAR AXLE = MASS and ACCELERATION
             // FrontAxleForce + RearAxleForce = Mass * Acceleration
@@ -93,6 +110,16 @@ namespace Top_down_car
 
 
             // TODO: use this.Content to load your game content here
+        }
+        public void posReset(int x) 
+        {
+            pointer.spritePosition = FrontAxle.spritePosition;
+            move = 50;
+            RearLine.spritePosition = RearAxle.spritePosition;
+            COR.spritePosition =new Vector2(COR.spritePosition.X, RearAxle.spritePosition.Y);
+
+            
+
         }
 
         protected override void Update(GameTime gameTime)
@@ -104,19 +131,45 @@ namespace Top_down_car
             FrontAxle.spritePosition = new Vector2(RearAxle.spritePosition.X, RearAxle.spritePosition.Y - 255 );
             COM.spritePosition = new Vector2(RearAxle.spritePosition.X, supra.spritePosition.Y * 0.97f);
 
-            Road1.spritePosition = Offset = matrix.transAxis(new Vector2(FrontAxle.spritePosition.X + move, FrontAxle.spritePosition.Y), rotation);
-           
-            if (Keyboard.GetState().IsKeyDown(Keys.Left))
-            {
-                move -= 30;
-            }
-            if (Keyboard.GetState().IsKeyDown(Keys.Right))
-            {
-                move += 30;
-            }
+            //Road1.spritePosition = Offset = matrix.transAxis(new Vector2(FrontAxle.spritePosition.X + move, FrontAxle.spritePosition.Y), rotation);
+           Offset = matrix.transAxis(new Vector2(1 + move, 1), rotation);
             a = FrontAxle.spritePosition.Y - RearAxle.spritePosition.Y;
             B = 90;
             C = rotation;
+
+            timeSinceLastUpdate += gameTime.ElapsedGameTime.TotalMilliseconds;
+            if (timeSinceLastUpdate >= millisecondsPerFrame)
+            {
+
+                if (Keyboard.GetState().IsKeyDown(Keys.Left))
+                {
+                    move += 0.000000000001f;
+                    pointer.spritePosition -= Offset;
+                }
+                if (Keyboard.GetState().IsKeyDown(Keys.Right))
+                {
+                    move += 0.000000000001f;
+
+                    pointer.spritePosition += Offset;
+                }
+                if (Keyboard.GetState().IsKeyDown(Keys.Down))
+                {
+                    posReset(1);
+                }
+                //if (Math.Round(Ref1.spritePosition.Y,10) == Math.Round(Ref2.spritePosition.Y,10))
+                //{
+                //    COR.spritePosition = new Vector2(Ref1.spritePosition.X, COR.spritePosition.Y);
+                //    Debug.WriteLine(1);
+                //}
+                Debug.WriteLine("y:{0}, y:{1}", Math.Round(pointer.spritePosition.Y / 10), Math.Round(RearLine.spritePosition.Y / 10));
+                if (Math.Round(pointer.spritePosition.Y/5) == Math.Round(RearLine.spritePosition.Y/5) || Math.Round(pointer.spritePosition.Y / 5) == Math.Round(RearLine.spritePosition.Y / 5 +1))
+                {
+                    COR.spritePosition = new Vector2(pointer.spritePosition.X, COR.spritePosition.Y);
+                    
+                }
+                timeSinceLastUpdate = 0;
+            }
+
 
 
             // TODO: Add your update logic here
@@ -135,7 +188,15 @@ namespace Top_down_car
             RearAxle.DrawSprite(_spriteBatch, RearAxle.spriteTexture, new Vector2(RearAxle.spriteTexture.Width / 2, RearAxle.spriteTexture.Height / 2), 0, Color.Green,matrix);
             COM.DrawSprite(_spriteBatch, COM.spriteTexture, new Vector2(COM.spriteTexture.Width / 2,COM.spriteTexture.Height / 2), 0, Color.Red,matrix);
 
-            Road1.DrawSprite(_spriteBatch, Road.spriteTexture, new Vector2(Road1.spriteTexture.Width / 2, Road1.spriteTexture.Height / 2), rotation, Color.Red, matrix);
+            pointer.DrawSprite(_spriteBatch, FrontAxle.spriteTexture, new Vector2(pointer.spriteTexture.Width / 2, pointer.spriteTexture.Height / 2), 0, Color.Red, matrix);
+            RearLine.DrawSprite(_spriteBatch, FrontAxle.spriteTexture, new Vector2(pointer.spriteTexture.Width / 2, pointer.spriteTexture.Height / 2), 0, Color.Red, matrix);
+            COR.DrawSprite(_spriteBatch, FrontAxle.spriteTexture, new Vector2(pointer.spriteTexture.Width / 2, pointer.spriteTexture.Height / 2), 0, Color.Green, matrix);
+            Ref1.DrawSprite(_spriteBatch, FrontAxle.spriteTexture, new Vector2(pointer.spriteTexture.Width / 2, pointer.spriteTexture.Height / 2), 0, Color.Blue, matrix);
+
+            Line.DrawLines(_spriteBatch, loadContent, FrontAxle.spritePosition, COR.spritePosition,matrix,rotation);
+
+
+
             // TODO: Add your drawing code here
 
             base.Draw(gameTime);
