@@ -28,6 +28,7 @@ namespace Top_down_car
         private Vector2 COG;
         private Texture2D loadContent;
         private float rotation;
+        private float carot;
         private Vector2 origin;
         private int Weight = 1570;
         private float Iz = 1536.403f;
@@ -42,6 +43,9 @@ namespace Top_down_car
         private Vector2 FAaxis;
         private Vector2 Offset;
         private MyMatrix matrix = new MyMatrix();
+
+        private MyMatrix matrix2 = new MyMatrix();
+        private Rectangle rearL = new Rectangle();
 
         private int millisecondsPerFrame = 1; //Update every 1 millisecond
         private double timeSinceLastUpdate = 0; //Accumulate the elapsed time
@@ -81,6 +85,7 @@ namespace Top_down_car
             loadContent = Content.Load<Texture2D>("road");
             pointer = new Sprite(loadContent, new Vector2(-100, -500), new Vector2(30, 30));
             RearLine = new Sprite(loadContent, new Vector2(-100, -500), new Vector2(4000000, 30));
+           
             Line = new Sprite(loadContent, new Vector2(10, 10), new Vector2(10, 10));
             COR = new Sprite(loadContent, new Vector2(-100, -500), new Vector2(15, 15));
             Ref1 = new Sprite(loadContent, new Vector2(10, 10), new Vector2(10, 10));
@@ -126,13 +131,22 @@ namespace Top_down_car
         {
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
-            rotation = inputMan.Steering(_graphics);
+            rotation = inputMan.Steering(_graphics,Keys.A,Keys.D);
             scroll = inputMan.zoom(_graphics);
             FrontAxle.spritePosition = new Vector2(RearAxle.spritePosition.X, RearAxle.spritePosition.Y - 255 );
             COM.spritePosition = new Vector2(RearAxle.spritePosition.X, supra.spritePosition.Y * 0.97f);
+            rearL = new Rectangle((int)RearLine.spritePosition.X, (int)RearLine.spritePosition.Y, 4000000, 100);
 
+            if (Keyboard.GetState().IsKeyDown(Keys.Left))
+            {
+                carot= 0.15f;
+            }
+            if (Keyboard.GetState().IsKeyDown(Keys.Right))
+            {
+                carot+= 0.15f;
+            }
             //Road1.spritePosition = Offset = matrix.transAxis(new Vector2(FrontAxle.spritePosition.X + move, FrontAxle.spritePosition.Y), rotation);
-           Offset = matrix.transAxis(new Vector2(1 + move, 1), rotation);
+
             a = FrontAxle.spritePosition.Y - RearAxle.spritePosition.Y;
             B = 90;
             C = rotation;
@@ -141,17 +155,6 @@ namespace Top_down_car
             if (timeSinceLastUpdate >= millisecondsPerFrame)
             {
 
-                if (Keyboard.GetState().IsKeyDown(Keys.Left))
-                {
-                    move += 0.000000000001f;
-                    pointer.spritePosition -= Offset;
-                }
-                if (Keyboard.GetState().IsKeyDown(Keys.Right))
-                {
-                    move += 0.000000000001f;
-
-                    pointer.spritePosition += Offset;
-                }
                 if (Keyboard.GetState().IsKeyDown(Keys.Down))
                 {
                     posReset(1);
@@ -175,6 +178,8 @@ namespace Top_down_car
             // TODO: Add your update logic here
             matrix.Follow(FrontAxle,rotation,origin,scroll);
 
+            matrix2.rotate(supra, carot, COR.spritePosition);
+
             base.Update(gameTime);
         }
 
@@ -183,7 +188,7 @@ namespace Top_down_car
             GraphicsDevice.Clear(Color.Black);
             Road.DrawSprite(_spriteBatch, Road.spriteTexture, new Vector2(0,0), 0, Color.White, matrix);
 
-            supra.DrawSprite(_spriteBatch, supra.spriteTexture , new Vector2(supra.spriteTexture.Width / 2, supra.spriteTexture.Height / 2), 0,Color.White,matrix);
+            supra.DrawSprite(_spriteBatch, supra.spriteTexture , new Vector2(supra.spriteTexture.Width / 2, supra.spriteTexture.Height / 2), 0,Color.White,matrix2);
             FrontAxle.DrawSprite(_spriteBatch, FrontAxle.spriteTexture, new Vector2(FrontAxle.spriteTexture.Width /2,FrontAxle.spriteTexture.Height/2), rotation, Color.Green,matrix);
             RearAxle.DrawSprite(_spriteBatch, RearAxle.spriteTexture, new Vector2(RearAxle.spriteTexture.Width / 2, RearAxle.spriteTexture.Height / 2), 0, Color.Green,matrix);
             COM.DrawSprite(_spriteBatch, COM.spriteTexture, new Vector2(COM.spriteTexture.Width / 2,COM.spriteTexture.Height / 2), 0, Color.Red,matrix);
@@ -193,7 +198,7 @@ namespace Top_down_car
             COR.DrawSprite(_spriteBatch, FrontAxle.spriteTexture, new Vector2(pointer.spriteTexture.Width / 2, pointer.spriteTexture.Height / 2), 0, Color.Green, matrix);
             Ref1.DrawSprite(_spriteBatch, FrontAxle.spriteTexture, new Vector2(pointer.spriteTexture.Width / 2, pointer.spriteTexture.Height / 2), 0, Color.Blue, matrix);
 
-            Line.DrawLines(_spriteBatch, loadContent, FrontAxle.spritePosition, COR.spritePosition,matrix,rotation);
+            COR.spritePosition = Line.DrawLines(_spriteBatch, loadContent, FrontAxle.spritePosition, COR.spritePosition,matrix,rotation,FrontAxle.spritePosition,RearLine.spritePosition,rearL);
 
 
 

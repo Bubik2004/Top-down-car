@@ -11,6 +11,7 @@ namespace Top_down_car
     class MyMatrix
     {
         public Matrix Transform { get; private set; }
+        public Matrix Transform2 { get; private set; }
         private Vector2[] comp = new Vector2[2];
         private Vector2 Res;
         private float preRot;
@@ -29,6 +30,21 @@ namespace Top_down_car
             Transform = Transform * offset;
 
             
+
+        }
+        public void rotate(Sprite Target, float rotation, Vector2 origin)
+        {
+            //Matrix Position = Matrix.CreateTranslation(-Target.spritePosition.X - (Target.spriteSize.X / 2),-Target.spritePosition.Y - (Target.spriteSize.Y / 2), 0);
+            Matrix offset = Matrix.CreateTranslation(Game1.dispX / 2, Game1.dispY / 2, 0);
+            //Matrix scale = Matrix.CreateScale(500);
+            //Matrix rot = Matrix.CreateRotationZ(rotation);
+            Transform2 = Matrix.CreateTranslation(new Vector3(-Target.spritePosition.X, -Target.spritePosition.Y, 0)) * Matrix.CreateRotationZ(-rotation);
+
+
+
+            Transform2 = Transform2 * offset;
+
+
 
         }
         public Vector2 transAxis(Vector2 W,float rotation) 

@@ -14,14 +14,16 @@ namespace Top_down_car
         public static float rotationF;
         float rotation_velocity = 1.5f;
         float scroll = 1;
-        public float Steering(GraphicsDeviceManager inGraphics)
+        public float Steering(GraphicsDeviceManager inGraphics,Keys key1,Keys key2)
         {
 
             KeyboardState state;
 
+
+
             state = Keyboard.GetState();
 
-            if (state.IsKeyDown(Keys.A))
+            if (state.IsKeyDown(key1))
             {
                 rotationF = -rotation_velocity;
                 if (steering > -0.782)
@@ -48,7 +50,7 @@ namespace Top_down_car
                 rotationF = -0;
             }
 
-            if (state.IsKeyDown(Keys.D))
+            if (state.IsKeyDown(key2))
             {
                 rotationF = rotation_velocity;
                 if (steering < 0.782)
